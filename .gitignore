@@ -1,0 +1,25 @@
+# Build
+target/
+*.class
+
+# IntelliJ
+.idea/
+*.iml
+out/
+
+# Maven / Gradle
+.mvn/wrapper/maven-wrapper.jar
+.gradle/
+build/
+
+# Logs
+*.log
+
+# Env / secrets
+.env
+application-local.properties
+application-local.yml
+
+# OS
+.DS_Store
+Thumbs.db
