@@ -1,0 +1,25 @@
+services:
+  app:
+    build: .
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/budgetsdb
+      SPRING_DATASOURCE_USERNAME: budgets_user
+      SPRING_DATASOURCE_PASSWORD: Qwerty123+
+
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: budgetsdb
+      POSTGRES_USER: budgets_user
+      POSTGRES_PASSWORD: Qwerty123+
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
