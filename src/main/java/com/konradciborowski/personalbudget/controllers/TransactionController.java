@@ -65,7 +65,7 @@ public class TransactionController {
     }
 
     @DeleteMapping("/{uuid}")
-    public void deleteTransaction(@PathVariable(name = "{uuid}") @NotNull @Size(max = 100) String uuid) {
+    public void deleteTransaction(@PathVariable(name = "uuid") @NotNull @Size(max = 100) String uuid) {
         TransactionDeletionStatus res = transactionService.deleteTransaction(uuid);
         if (res.equals(TransactionDeletionStatus.TRANSACTION_DOES_NOT_EXIST)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
