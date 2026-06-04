@@ -3,6 +3,7 @@ package com.konradciborowski.personalbudget.controllers;
 import com.konradciborowski.personalbudget.dtos.ListOfTransactionsResponseDto;
 import com.konradciborowski.personalbudget.dtos.TransactionRequestDto;
 import com.konradciborowski.personalbudget.results.TransactionDeletionStatus;
+import com.konradciborowski.personalbudget.services.AccountService;
 import com.konradciborowski.personalbudget.services.TransactionService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -21,8 +22,11 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
-    public TransactionController(TransactionService transactionService) {
+    private final AccountService accountService;
+
+    public TransactionController(TransactionService transactionService, AccountService accountService) {
         this.transactionService = transactionService;
+        this.accountService = accountService;
     }
 
 
@@ -45,7 +49,10 @@ public class TransactionController {
             @Size(max = 100, message = "Category must be at most 100 characters")
             String category
     ) {
-        return transactionService.getTransactions(accountName,from,to,category);
+        if (!accountService.doesAccountExist(accountName)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account does not exist");
+        }
+        return transactionService.getTransactions(accountName, from, to, category);
     }
 
     @PostMapping
@@ -71,13 +78,39 @@ public class TransactionController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
     }
+
+    @GetMapping(value = "export", produces = "text/csv")
+    public String exportTransactionsToCsv(
+            @PathVariable(name = "account_name")
+            @NotBlank
+            @Size(max = 100, message = "Account name must be at most 100 characters")
+            String accountName,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate from,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate to,
+
+            @RequestParam(required = false)
+            String category
+    ) {
+        if (!accountService.doesAccountExist(accountName)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account does not exist");
+        }
+        return transactionService.exportTransactionsToCsv(accountName, from, to, category);
+    }
+
+
     public sealed interface TransactionCreationResult permits Success, Failure {
     }
 
     public record Success(String uuid) implements TransactionCreationResult {
     }
 
-    public record Failure( ) implements
+    public record Failure() implements
             TransactionCreationResult {
     }
 }

@@ -19,53 +19,54 @@ import java.util.Optional;
 public class AccountsController {
 
 
-        private final AccountService accountService;
+    private final AccountService accountService;
 
-        public AccountsController(AccountService accountService) {
-                this.accountService = accountService;
+    public AccountsController(AccountService accountService) {
+        this.accountService = accountService;
+    }
+
+
+    @PostMapping(path = "/create")
+    public void createAccount(@Valid @RequestBody AccountDto accountDto) {
+        AccountCreationStatus status = accountService.createAccount(accountDto);
+        if (status.equals(AccountCreationStatus.ACCOUNT_ALREADY_EXISTS)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Account already exists");
         }
+        throw new ResponseStatusException(HttpStatus.CREATED);
+    }
 
+    @GetMapping
+    public ListOfAccountNamesResponseDto getAllAccountNames() {
+        return accountService.getAllAccountNames();
+    }
 
-        @PostMapping(path = "/create")
-        public void createAccount(@Valid @RequestBody AccountDto accountDto) {
-                AccountCreationStatus status = accountService.createAccount(accountDto);
-                if(status.equals(AccountCreationStatus.ACCOUNT_ALREADY_EXISTS)) {
-                        throw new ResponseStatusException(HttpStatus.CONFLICT,"Account already exists");
-                }
-                throw new ResponseStatusException(HttpStatus.CREATED);
+    @GetMapping("/{name}")
+    public AccountDto getAccountDetails(
+            @PathVariable(name = "name")
+            @NotBlank(message = "Account name is required")
+            @Size(max = 100, message = "Account name must be at most 100 characters")
+            String name) {
+        Optional<AccountDto> responseOpt = accountService.getAccountDetails(name);
+        if (responseOpt.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        @GetMapping
-        public ListOfAccountNamesResponseDto getAllAccountNames() {
-                return accountService.getAllAccountNames();
-        }
+        return responseOpt.get();
+    }
 
-        @GetMapping("/{name}")
-        public AccountDto getAccountDetails(
-                @PathVariable(name = "name")
-                @NotBlank(message = "Account name is required")
-                @Size(max = 100, message = "Account name must be at most 100 characters")
-                String name) {
-                Optional<AccountDto> responseOpt = accountService.getAccountDetails(name);
-                if(responseOpt.isEmpty()) {
-                        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-                }
-                return responseOpt.get();
+    @DeleteMapping("/{name}")
+    public void deleteAccount(
+            @PathVariable(name = "name")
+            @NotBlank(message = "Account name is required")
+            @Size(max = 100, message = "Account name must be at most 100 characters")
+            String name) {
+        AccountDeletionStatus deletionStatus = accountService.deleteAccount(name);
+        if (deletionStatus.equals(AccountDeletionStatus.ACCOUNT_DOES_NOT_EXIST)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-
-        @DeleteMapping("/{name}")
-        public void deleteAccount(
-                @PathVariable(name = "name")
-                @NotBlank(message = "Account name is required")
-                @Size(max = 100, message = "Account name must be at most 100 characters")
-                String name) {
-                AccountDeletionStatus deletionStatus = accountService.deleteAccount(name);
-                if (deletionStatus.equals(AccountDeletionStatus.ACCOUNT_DOES_NOT_EXIST)) {
-                        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-                }
-                if(deletionStatus.equals(AccountDeletionStatus.ACCOUNT_HAS_EXISTING_TRANSACTIONS)) {
-                        throw new ResponseStatusException(HttpStatus.CONFLICT);
-                }
-                throw new ResponseStatusException(HttpStatus.OK);
-
+        if (deletionStatus.equals(AccountDeletionStatus.ACCOUNT_HAS_EXISTING_TRANSACTIONS)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT);
         }
+        throw new ResponseStatusException(HttpStatus.OK);
+
+    }
 }

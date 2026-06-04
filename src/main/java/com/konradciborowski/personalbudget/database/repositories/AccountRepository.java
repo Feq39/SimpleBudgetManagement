@@ -9,8 +9,9 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface AccountRepository extends JpaRepository<AccountEntity,Long> {
-    public Optional<AccountEntity> findByName(String name);
+public interface AccountRepository extends JpaRepository<AccountEntity, Long> {
+    Optional<AccountEntity> findByName(String name);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    public Optional<AccountEntity> findWithLockingByName(String name);
+    Optional<AccountEntity> findWithLockingByName(String name);
 }

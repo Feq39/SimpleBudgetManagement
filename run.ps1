@@ -3,7 +3,7 @@ param(
     [string]$Port
 )
 
-.\mvnw clean package
+.\mvnw.cmd clean package
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Maven build failed"
@@ -11,4 +11,5 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $env:APP_PORT = $Port
+
 docker compose up --build

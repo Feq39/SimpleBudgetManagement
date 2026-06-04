@@ -19,6 +19,7 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
+
     public AccountService(AccountRepository accountRepository, TransactionRepository transactionRepository) {
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
@@ -52,6 +53,7 @@ public class AccountService {
         return Optional.of(new AccountDto(accountEntity.getName(), accountEntity.getBalance()));
 
     }
+
     @Transactional
     public AccountDeletionStatus deleteAccount(String accountName) {
         Optional<AccountEntity> accountEntityOpt = accountRepository.findWithLockingByName(accountName);
@@ -60,11 +62,14 @@ public class AccountService {
         }
         AccountEntity account = accountEntityOpt.get();
         List<TransactionEntity> accountTransactions = transactionRepository.findByAccount(account);
-        if(!accountTransactions.isEmpty()) {
+        if (!accountTransactions.isEmpty()) {
             return AccountDeletionStatus.ACCOUNT_HAS_EXISTING_TRANSACTIONS;
         }
         accountRepository.delete(account);
         return AccountDeletionStatus.DELETED;
     }
 
+    public boolean doesAccountExist(String accountName) {
+        return accountRepository.findByName(accountName).isPresent();
+    }
 }

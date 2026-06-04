@@ -15,7 +15,7 @@ public class TransactionEntity {
     private long id;
     @Column(name = "uuid")
     private String uuid;
-    @Column(name = "amount", nullable = false ,precision = 19, scale = 2)
+    @Column(name = "amount", nullable = false, precision = 19, scale = 2)
     private BigDecimal amount;
 
 
@@ -23,7 +23,7 @@ public class TransactionEntity {
     @Column(name = "type", nullable = false, length = 20)
     private TransactionType type;
 
-    @Column(name = "category", nullable = false,length = 100)
+    @Column(name = "category", nullable = false, length = 100)
     private String category;
 
     @Column(name = "description", length = 500, nullable = true)
@@ -32,21 +32,13 @@ public class TransactionEntity {
     private LocalDate date;
 
     @ManyToOne
-    @JoinColumn(name = "account_id",nullable = false)
+    @JoinColumn(name = "account_id", nullable = false)
     private AccountEntity account;
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
 
     public TransactionEntity() {
     }
 
-    public TransactionEntity(String uuid,BigDecimal amount, TransactionType type, String category, String description, LocalDate date, AccountEntity account) {
+    public TransactionEntity(String uuid, BigDecimal amount, TransactionType type, String category, String description, LocalDate date, AccountEntity account) {
         this.uuid = uuid;
         this.amount = amount;
         this.type = type;
@@ -54,6 +46,14 @@ public class TransactionEntity {
         this.description = description;
         this.date = date;
         this.account = account;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public long getId() {

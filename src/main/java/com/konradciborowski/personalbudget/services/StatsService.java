@@ -21,7 +21,7 @@ public class StatsService {
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
 
-    public StatsService(AccountRepository accountRepository,TransactionRepository transactionRepository) {
+    public StatsService(AccountRepository accountRepository, TransactionRepository transactionRepository) {
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
     }
@@ -37,11 +37,11 @@ public class StatsService {
         BigDecimal totalIncome = transactions.stream()
                 .filter(e -> e.getType().equals(TransactionType.INCOME))
                 .map(TransactionEntity::getAmount)
-                .reduce(BigDecimal.ZERO,BigDecimal::add);
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal totalExpenses = transactions.stream()
                 .filter(e -> e.getType().equals(TransactionType.EXPENSE))
                 .map(TransactionEntity::getAmount)
-                .reduce(BigDecimal.ZERO,BigDecimal::add);
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         Map<String, BigDecimal> expensesByCategory = transactions.stream()
                 .filter(transaction -> transaction.getType() == TransactionType.EXPENSE)
                 .collect(Collectors.groupingBy(
@@ -52,6 +52,6 @@ public class StatsService {
                                 BigDecimal::add
                         )
                 ));
-        return new StatsController.Success(new StatsDto(totalIncome,totalExpenses,expensesByCategory));
+        return new StatsController.Success(new StatsDto(totalIncome, totalExpenses, expensesByCategory));
     }
 }

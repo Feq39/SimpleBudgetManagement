@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name="accounts")
+@Table(name = "accounts")
 public class AccountEntity {
 
     @Id
@@ -16,7 +16,7 @@ public class AccountEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "balance", nullable = false ,precision = 19, scale = 2)
+    @Column(name = "balance", nullable = false, precision = 19, scale = 2)
     private BigDecimal balance;
 
     public AccountEntity(String name, BigDecimal balance) {

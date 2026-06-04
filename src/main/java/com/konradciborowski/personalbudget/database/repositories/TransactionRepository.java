@@ -12,8 +12,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface TransactionRepository extends JpaRepository<TransactionEntity,Long>, JpaSpecificationExecutor<TransactionEntity> {
+public interface TransactionRepository extends JpaRepository<TransactionEntity, Long>, JpaSpecificationExecutor<TransactionEntity> {
     List<TransactionEntity> findByAccount(AccountEntity account);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<TransactionEntity> findWithLockingByUuid(String uuid);
 

@@ -20,26 +20,31 @@ public class StatsController {
     public StatsController(StatsService statsService) {
         this.statsService = statsService;
     }
+
     @GetMapping
     public StatsDto getStatsForAccount(
             @PathVariable(name = "account_name")
             @NotBlank
-            @Size(max = 100,  message = "Account name must be at most 100 characters")
+            @Size(max = 100, message = "Account name must be at most 100 characters")
             String accountName
-            ) {
+    ) {
         Result res = statsService.getAccountStats(accountName);
         switch (res) {
             case Success success -> {
                 return success.statsDto;
             }
             case Failure failure -> {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Account does not exist");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account does not exist");
             }
         }
     }
-    public sealed interface Result permits Success,Failure{}
 
-    public record Success(StatsDto statsDto) implements Result {}
+    public sealed interface Result permits Success, Failure {
+    }
 
-    public record Failure() implements Result{}
+    public record Success(StatsDto statsDto) implements Result {
+    }
+
+    public record Failure() implements Result {
+    }
 }

@@ -43,7 +43,7 @@ public class TransactionSpecification {
             }
 
             return criteriaBuilder.greaterThanOrEqualTo(
-                    root.get("transactionDate"),
+                    root.get("date"),
                     from
             );
         };
@@ -56,7 +56,7 @@ public class TransactionSpecification {
             }
 
             return criteriaBuilder.lessThanOrEqualTo(
-                    root.get("transactionDate"),
+                    root.get("date"),
                     to
             );
         };

@@ -9,8 +9,8 @@ import com.konradciborowski.personalbudget.database.specifications.TransactionSp
 import com.konradciborowski.personalbudget.dtos.ListOfTransactionsResponseDto;
 import com.konradciborowski.personalbudget.dtos.TransactionRequestDto;
 import com.konradciborowski.personalbudget.dtos.TransactionResponseDto;
-import com.konradciborowski.personalbudget.results.TransactionDeletionStatus;
 import com.konradciborowski.personalbudget.enums.TransactionType;
+import com.konradciborowski.personalbudget.results.TransactionDeletionStatus;
 import jakarta.annotation.Nullable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -22,13 +22,16 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.apache.commons.text.StringEscapeUtils.escapeCsv;
+
 @Service
 public class TransactionService {
 
 
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
-    public TransactionService(TransactionRepository transactionRepository,AccountRepository accountRepository) {
+
+    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
     }
@@ -45,7 +48,7 @@ public class TransactionService {
                 .and(TransactionSpecification.hasCategory(category));
         return new ListOfTransactionsResponseDto(
                 transactionRepository
-                        .findAll(specification, Sort.by(Sort.Direction.DESC, "transactionDate"))
+                        .findAll(specification, Sort.by(Sort.Direction.DESC, "date"))
                         .stream()
                         .map(e -> new TransactionResponseDto(
                                 e.getUuid(),
@@ -59,6 +62,7 @@ public class TransactionService {
                         .toList());
 
     }
+
     @Transactional
     public TransactionController.TransactionCreationResult createTransaction(TransactionRequestDto transactionRequestDto) {
         Optional<AccountEntity> accountEntityOpt = accountRepository.findWithLockingByName(transactionRequestDto.accountName());
@@ -66,7 +70,7 @@ public class TransactionService {
             return new TransactionController.Failure();
         }
         AccountEntity account = accountEntityOpt.get();
-        String uuid =UUID.randomUUID().toString() ;
+        String uuid = UUID.randomUUID().toString();
         TransactionEntity transaction = new TransactionEntity(
                 uuid,
                 transactionRequestDto.amount(),
@@ -87,10 +91,11 @@ public class TransactionService {
         transactionRepository.save(transaction);
         return new TransactionController.Success(uuid);
     }
+
     @Transactional
     public TransactionDeletionStatus deleteTransaction(String uuid) {
         Optional<TransactionEntity> transactionOpt = transactionRepository.findWithLockingByUuid(uuid);
-        if(transactionOpt.isEmpty()) {
+        if (transactionOpt.isEmpty()) {
             return TransactionDeletionStatus.TRANSACTION_DOES_NOT_EXIST;
         }
         TransactionEntity transaction = transactionOpt.get();
@@ -109,4 +114,28 @@ public class TransactionService {
         return TransactionDeletionStatus.DELETED;
     }
 
+    public String exportTransactionsToCsv(
+            String accountName,
+            LocalDate from,
+            LocalDate to,
+            String category
+    ) {
+        ListOfTransactionsResponseDto response = getTransactions(accountName, from, to, category);
+
+        StringBuilder csv = new StringBuilder();
+
+        csv.append("uuid,amount,type,category,description,date,accountName\n");
+
+        for (TransactionResponseDto transaction : response.transactions()) {
+            csv.append(escapeCsv(transaction.uuid())).append(",");
+            csv.append(transaction.amount()).append(",");
+            csv.append(transaction.type()).append(",");
+            csv.append(escapeCsv(transaction.category())).append(",");
+            csv.append(escapeCsv(transaction.description())).append(",");
+            csv.append(transaction.date()).append(",");
+            csv.append(escapeCsv(transaction.accountName())).append("\n");
+        }
+
+        return csv.toString();
+    }
 }
